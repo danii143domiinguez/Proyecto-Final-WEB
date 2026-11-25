@@ -1,0 +1,80 @@
+:host {
+    --c1: #8381E3;
+    --c2: #B481E3;
+    --c3: #E381E1;
+    --c4: #D881E3;
+    --c5: #E381BD;
+    --c6: #E3818C;
+}
+
+.titulo-color-1 {
+    color: var(--c1);
+}
+
+.titulo-color-2 {
+    color: var(--c2);
+}
+
+.titulo-color-3 {
+    color: var(--c3);
+}
+
+.titulo-color-4 {
+    color: var(--c4);
+}
+
+.titulo-color-5 {
+    color: var(--c5);
+}
+
+.titulo-color-6 {
+    color: var(--c6);
+}
+
+.borde-color-1 {
+    border-top: 5px solid var(--c1);
+}
+
+.borde-color-2 {
+    border-top: 5px solid var(--c2);
+}
+
+.borde-color-3 {
+    border-top: 5px solid var(--c3);
+}
+
+.borde-color-4 {
+    border-top: 5px solid var(--c4);
+}
+
+.borde-color-5 {
+    border-top: 5px solid var(--c5);
+}
+
+.borde-color-6 {
+    border-top: 5px solid var(--c6);
+}
+
+.badge-color-1 {
+    background-color: var(--c1);
+}
+
+.badge-color-2 {
+    background-color: var(--c2);
+}
+
+.badge-color-3 {
+    background-color: var(--c3);
+}
+
+.badge-color-4 {
+    background-color: var(--c4);
+}
+
+.badge-color-5 {
+    background-color: var(--c5);
+}
+
+.badge-color-6 {
+    background-color: var(--c6);
+}

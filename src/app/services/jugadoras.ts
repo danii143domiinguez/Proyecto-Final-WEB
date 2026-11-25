@@ -1,0 +1,27 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class JugadorasService {
+    url = 'http://localhost/api_web/jugadoras.php';
+
+    constructor(private http: HttpClient) { }
+
+    getJugadoras(equipo: string) {
+        return this.http.post<any[]>(
+            this.url,
+            JSON.stringify({ accion: 'listar', equipo: equipo }),
+            { headers: { 'Content-Type': 'text/plain' } }
+        );
+    }
+
+    agregarJugadora(equipo: string, datos: any) {
+        return this.http.post<any>(
+            this.url,
+            JSON.stringify({ accion: 'agregar', equipo: equipo, ...datos }),
+            { headers: { 'Content-Type': 'text/plain' } }
+        );
+    }
+}

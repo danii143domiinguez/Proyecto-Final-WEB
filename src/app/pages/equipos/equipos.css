@@ -1,0 +1,92 @@
+:host {
+    --c1: #8381E3;
+    --c2: #B481E3;
+    --c3: #E381E1;
+    --c4: #D881E3;
+    --c5: #E381BD;
+    --c6: #E3818C;
+}
+
+.titulo-principal {
+    color: var(--c1);
+}
+
+.slide-1 {
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+}
+
+.slide-2 {
+    background: linear-gradient(135deg, var(--c2), var(--c3));
+}
+
+.slide-3 {
+    background: linear-gradient(135deg, var(--c3), var(--c4));
+}
+
+.slide-4 {
+    background: linear-gradient(135deg, var(--c4), var(--c5));
+}
+
+.slide-5 {
+    background: linear-gradient(135deg, var(--c5), var(--c6));
+}
+
+.slide-6 {
+    background: linear-gradient(135deg, var(--c6), var(--c1));
+}
+
+.borde-color-1 {
+    border-top: 4px solid var(--c1);
+}
+
+.borde-color-2 {
+    border-top: 4px solid var(--c2);
+}
+
+.borde-color-3 {
+    border-top: 4px solid var(--c3);
+}
+
+.borde-color-4 {
+    border-top: 4px solid var(--c4);
+}
+
+.borde-color-5 {
+    border-top: 4px solid var(--c5);
+}
+
+.borde-color-6 {
+    border-top: 4px solid var(--c6);
+}
+
+.badge-color-1 {
+    background-color: var(--c1);
+}
+
+.badge-color-2 {
+    background-color: var(--c2);
+}
+
+.badge-color-3 {
+    background-color: var(--c3);
+}
+
+.badge-color-4 {
+    background-color: var(--c4);
+}
+
+.badge-color-5 {
+    background-color: var(--c5);
+}
+
+.badge-color-6 {
+    background-color: var(--c6);
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}

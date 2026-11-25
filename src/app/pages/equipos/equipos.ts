@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
-  imports: [],
   selector: 'app-equipos',
-  styleUrl: './equipos.css',
+  standalone: true,
+  imports: [RouterLink],
   templateUrl: './equipos.html',
+  styleUrl: './equipos.css'
 })
-export class Equipos {}
+export class Equipos { }
