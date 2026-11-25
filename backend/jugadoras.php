@@ -13,6 +13,7 @@ try {
     $data = json_decode($input, true);
 
     $conn = new mysqli("localhost", "root", "root123", "mujeres diversas mexico");
+    //AQUI TIENEN QUE PONER LA INFORMACIÓN DE SU LOCALHOST PARA QUE CONECTEN A LA BASE DE
 
     if ($conn->connect_error) {
         exit;

@@ -5,7 +5,8 @@ import { HttpClient } from '@angular/common/http';
     providedIn: 'root'
 })
 export class JugadorasService {
-    url = 'http://localhost/api_web/jugadoras.php';
+    url = 'http://localhost/proyecto_final_web/Proyecto-Final-WEB/backend/jugadoras.php';
+    //AQUI TIENEN QUE PONER SU RUTA DE USTEDES
 
     constructor(private http: HttpClient) { }
 

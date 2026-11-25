@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -38,7 +38,11 @@ export class EquipoDetalles implements OnInit {
     { slug: 'lobas-mexico', prefijo: 'LM', numero: 'Equipo 11', nombre: 'Lobas México', edicion: '4.ª Edición', descripcion: 'Página oficial del equipo Lobas México en Mujeres Diversas México.', colorIndex: 5 }
   ];
 
-  constructor(private route: ActivatedRoute, private servicio: JugadorasService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private servicio: JugadorasService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -55,6 +59,7 @@ export class EquipoDetalles implements OnInit {
   cargarJugadoras() {
     this.servicio.getJugadoras(this.slug).subscribe(data => {
       this.jugadoras = data;
+      this.cdr.detectChanges();
     });
   }
 
@@ -80,6 +85,7 @@ export class EquipoDetalles implements OnInit {
     this.servicio.agregarJugadora(this.slug, this.nueva).subscribe(creada => {
       this.jugadoras.push(creada);
       this.mostrarForm = false;
+      this.cdr.detectChanges();
     });
   }
 }
