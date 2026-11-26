@@ -1,10 +1,11 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-header('Content-Type: application/json; charset=utf-8');
+header("Access-Control-Allow-Origin: http://localhost:4200");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Content-Type: application/json; charset=UTF-8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
     exit;
 }
 
@@ -12,7 +13,7 @@ try {
     $input = file_get_contents("php://input");
     $data = json_decode($input, true);
 
-    $conn = new mysqli("localhost", "root", "root123", "mujeres diversas mexico");
+    $conn = new mysqli("localhost", "root", "12345", "mujeres_diversas_mexico");
     //AQUI TIENEN QUE PONER LA INFORMACIÓN DE SU LOCALHOST PARA QUE CONECTEN A LA BASE DE
 
     if ($conn->connect_error) {

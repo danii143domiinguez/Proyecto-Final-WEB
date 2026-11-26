@@ -1,1 +1,122 @@
-<p>registros works!</p>
+<div class="registros-wrapper">
+  <div class="container py-5">
+    <div class="registro-header">
+      <h1>Registro de Equipo</h1>
+      <p>Completa los datos del equipo, escudo y registra a lasjugadoras.</p>
+    </div>
+
+    @if (mensajeExito) {
+      <div class="alert alert-exito d-flex justify-content-between align-items-center">
+        <span>{{ mensajeExito }}</span>
+        <button type="button" class="btn-close" (click)="mensajeExito = ''"></button>
+      </div>
+    }
+
+    <form (ngSubmit)="registrarEquipo()" class="registro-form">
+      <div class="row g-4 align-items-start mb-4">
+        <div class="col-8">
+          <label for="nombreEquipo" class="form-label">Nombre del Equipo</label>
+          <input
+            type="text"
+            id="nombreEquipo"
+            name="nombreEquipo"
+            class="form-control custom-input"
+            [(ngModel)]="nombreEquipo"
+            required
+          >
+
+          <label for="logoEquipo" class="form-label mt-4">Logo del Equipo (PNG o JPG)</label>
+          <input
+            type="file"
+            id="logoEquipo"
+            class="form-control custom-input"
+            accept="image/png, image/jpeg"
+            (change)="onLogoSeleccionado($event)"
+          >
+        </div>
+
+        <div class="col-4 d-flex justify-content-end">
+          <div class="logo-preview-box">
+            @if (logoPreview) {
+              <img [src]="logoPreview" alt="Vista previa del logo" class="logo-preview-img">
+            } @else {
+              <span class="logo-placeholder">Vista previa del logo</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <hr class="divisor">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="subtitulo mb-0">Registro de Jugadoras</h2>
+        <button type="button" class="btn btn-agregar" (click)="agregarJugadora()">
+          + Agregar Jugadora
+        </button>
+      </div>
+
+      <div class="jugadoras-lista">
+        @for (jugadora of jugadoras; track $index) {
+          <div class="row g-3 align-items-end jugadora-fila">
+            <div class="col-5">
+              <label class="form-label">Nombre completo</label>
+              <input
+                type="text"
+                class="form-control custom-input"
+                [name]="'nombre_' + $index"
+                [(ngModel)]="jugadora.nombre"
+                placeholder="Nombre de la jugadora"
+                required
+              >
+            </div>
+
+            <div class="col-2">
+              <label class="form-label">Dorsal</label>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                class="form-control custom-input"
+                [name]="'dorsal_' + $index"
+                [(ngModel)]="jugadora.dorsal"
+                placeholder="10"
+                required
+              >
+            </div>
+
+            <div class="col-3">
+              <label class="form-label">Posición</label>
+              <select
+                class="form-select custom-input"
+                [name]="'posicion_' + $index"
+                [(ngModel)]="jugadora.posicion"
+              >
+                <option value="Portera">Portera</option>
+                <option value="Defensa">Defensa</option>
+                <option value="Mediocampista">Mediocampista</option>
+                <option value="Delantera">Delantera</option>
+              </select>
+            </div>
+
+            <div class="col-2 text-end">
+              <button
+                type="button"
+                class="btn btn-eliminar w-100"
+                (click)="eliminarJugadora($index)"
+                [disabled]="jugadoras.length === 1"
+              >
+                Quitar
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="text-end mt-4">
+        <button type="submit" class="btn btn-enviar">
+          Guardar Registro
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
