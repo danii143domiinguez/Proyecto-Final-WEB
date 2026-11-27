@@ -1,1 +1,85 @@
-<p>perfiles works!</p>
+<div class="perfiles-wrapper">
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h1 class="perfiles-titulo">Perfiles de Jugadoras</h1>
+        <p class="perfiles-subtitulo">Busca a tu jugadora estrella y conoce un poco sobre su rendimiento.</p>
+      </div>
+
+      <div class="d-flex gap-3 filtros-bar">
+        <input
+          type="text"
+          class="form-control custom-input"
+          placeholder="Buscar por nombre..."
+          [(ngModel)]="busqueda"
+        >
+        <select class="form-select custom-input" [(ngModel)]="equipoSeleccionado">
+          @for (equipo of equipos; track equipo) {
+            <option [value]="equipo">{{ equipo }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      @for (jugadora of jugadorasFiltradas; track $index) {
+        <div class="col-4">
+          <div class="perfil-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="dorsal-badge">#{{ jugadora.dorsal }}</div>
+              <div>
+                <h2 class="jugadora-nombre">{{ jugadora.nombre }}</h2>
+                <span class="equipo-tag">{{ jugadora.equipo }}</span>
+              </div>
+            </div>
+
+            <div class="posicion-fila">
+              <span class="etiqueta">Posición</span>
+              <span class="valor">{{ jugadora.posicion }}</span>
+            </div>
+
+            <hr class="divisor">
+
+            <div class="estadisticas-grid">
+              <div class="stat-item">
+                <span class="stat-label">Goles</span>
+                <span class="stat-valor" [class.con-goles]="jugadora.goles > 0">
+                  {{ jugadora.goles }}
+                </span>
+                <span class="stat-estado">
+                  {{ jugadora.goles > 0 ? 'Ha anotado' : 'Sin goles' }}
+                </span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Amarillas</span>
+                <span class="stat-valor">
+                  <span class="tarjeta-icono amarilla"></span>
+                  {{ jugadora.tarjetasAmarillas }}
+                </span>
+                <span class="stat-estado">
+                  {{ jugadora.tarjetasAmarillas > 0 ? 'Amonestada' : 'Limpia' }}
+                </span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Rojas</span>
+                <span class="stat-valor">
+                  <span class="tarjeta-icono roja"></span>
+                  {{ jugadora.tarjetasRojas }}
+                </span>
+                <span class="stat-estado">
+                  {{ jugadora.tarjetasRojas > 0 ? 'Expulsada' : 'Limpia' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-12">
+          <p class="sin-resultados">No se encontraron jugadoras con esos filtros.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
