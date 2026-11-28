@@ -1,0 +1,93 @@
+.admin-wrapper {
+    background-color: #f9f8fe;
+    min-height: calc(100vh - 68px);
+}
+
+.admin-titulo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-1);
+}
+
+.admin-subtitulo {
+    color: #5f5b7a;
+    font-size: 0.98rem;
+}
+
+.admin-card {
+    background-color: #ffffff;
+    padding: 1.75rem;
+    border-radius: 16px;
+    border-top: 5px solid var(--color-1);
+    box-shadow: 0 6px 18px rgba(131, 129, 227, 0.12);
+}
+
+.subtitulo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-1);
+}
+
+.custom-input {
+    border: 1.5px solid #e2dff5;
+    border-radius: 10px;
+}
+
+.custom-input:focus {
+    border-color: var(--color-2);
+    box-shadow: 0 0 0 0.2rem rgba(180, 129, 227, 0.25);
+}
+
+.btn-principal {
+    background: linear-gradient(135deg, var(--color-1), var(--color-5), var(--color-6));
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+}
+
+.btn-principal:hover {
+    color: #ffffff;
+    opacity: 0.95;
+}
+
+.btn-agregar {
+    background-color: rgba(131, 129, 227, 0.14);
+    color: var(--color-1);
+    font-weight: 600;
+    border: 1.5px solid var(--color-1);
+    border-radius: 999px;
+}
+
+.btn-agregar:hover {
+    background-color: var(--color-1);
+    color: #ffffff;
+}
+
+.btn-eliminar {
+    background-color: rgba(227, 129, 140, 0.14);
+    color: var(--color-6);
+    font-weight: 600;
+    border: 1.5px solid var(--color-6);
+    border-radius: 10px;
+}
+
+.btn-eliminar:hover {
+    background-color: var(--color-6);
+    color: #ffffff;
+}
+
+.alert-exito {
+    background-color: rgba(131, 129, 227, 0.15);
+    border-left: 5px solid var(--color-1);
+    color: #2d2a4a;
+    border-radius: 10px;
+}
+
+.cedula-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 2px solid var(--color-5);
+}

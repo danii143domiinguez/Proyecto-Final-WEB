@@ -1,1 +1,529 @@
-<p>administracion works!</p>
+<div class="admin-wrapper">
+    <div class="container py-5">
+        @if (!autenticado) {
+        <!-- Acceso administrativo provisional -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="admin-card">
+                    <h1 class="admin-titulo">Acceso Administrativo</h1>
+                    <p class="admin-subtitulo">Ingresa la clave para gestionar partidos y cédulas arbitrales.</p>
+
+                    @if (errorLogin) {
+                    <div class="alert alert-danger py-2 small">{{ errorLogin }}</div>
+                    }
+
+                    <form (ngSubmit)="ingresar()">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Clave administrativa</label>
+                            <input type="password" class="form-control custom-input" [(ngModel)]="clave" name="clave"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-principal w-100">Ingresar</button>
+                    </form>
+                    <p class="small text-muted mt-3 mb-0">
+                        Nota académica: validación provisional en el navegador (no sustituye autenticación en servidor).
+                    </p>
+                </div>
+            </div>
+        </div>
+        } @else {
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h1 class="admin-titulo mb-0">Administración — Cédula Arbitral</h1>
+                <small class="text-muted">2 tiempos de 20 min · Descanso 5 min · Sin empates definitivos</small>
+            </div>
+            <button type="button" class="btn btn-eliminar btn-sm" (click)="cerrarSesion()">Cerrar sesión</button>
+        </div>
+
+        @if (!partidoActual) {
+        <!-- LISTA DE PARTIDOS -->
+        <div class="admin-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="subtitulo mb-0">Partidos Registrados</h2>
+                <button type="button" class="btn btn-principal btn-sm" (click)="nuevoPartido()">+ Nuevo Partido</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Jornada</th>
+                            <th>Fecha</th>
+                            <th>Encuentro</th>
+                            <th>Marcador</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (p of partidos; track p.id) {
+                        <tr>
+                            <td>J{{ p.jornada }} <small class="text-muted">({{ p.fase }})</small></td>
+                            <td>{{ p.fecha }} {{ p.hora }}</td>
+                            <td>{{ nombreEquipo(p.localSlug) }} vs {{ nombreEquipo(p.visitanteSlug) }}</td>
+                            <td>
+                                <span class="badge bg-dark">{{ golesEquipo(p, 'local') }} - {{ golesEquipo(p,
+                                    'visitante') }}</span>
+                                @if (p.penalesLocal !== null && p.penalesVisitante !== null) {
+                                <small class="text-muted ms-1">(Pen {{ p.penalesLocal }}-{{ p.penalesVisitante
+                                    }})</small>
+                                }
+                            </td>
+                            <td>{{ p.estado }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-agregar btn-sm me-1"
+                                    (click)="abrirCedula(p)">Cédula</button>
+                                <button type="button" class="btn btn-eliminar btn-sm"
+                                    (click)="eliminarPartido(p.id)">Eliminar</button>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No hay partidos registrados. Crea uno con "+ Nuevo Partido".
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TABLA GENERAL SIMPLE -->
+        @if (tablaPosiciones().length > 0) {
+        <div class="admin-card">
+            <h2 class="subtitulo mb-3">Tabla General (Round Robin)</h2>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>PJ</th>
+                            <th>PG</th>
+                            <th>PP</th>
+                            <th>GF</th>
+                            <th>GC</th>
+                            <th>PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (t of tablaPosiciones(); track t.nombre) {
+                        <tr>
+                            <td class="fw-semibold">{{ t.nombre }}</td>
+                            <td>{{ t.pj }}</td>
+                            <td>{{ t.pg }}</td>
+                            <td>{{ t.pp }}</td>
+                            <td>{{ t.gf }}</td>
+                            <td>{{ t.gc }}</td>
+                            <td class="fw-bold">{{ t.pts }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        }
+        } @else {
+        <!-- CÉDULA ARBITRAL DIGITAL (Basada en Cédula árbitros LFMDM.pdf) -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="volverALista()">&larr;
+                Volver</button>
+            <button type="button" class="btn btn-principal btn-sm" (click)="guardarCedula()">Guardar Cédula</button>
+        </div>
+
+        @if (mensaje) {
+        <div class="alert alert-exito py-2">{{ mensaje }}</div>
+        }
+        @if (errores.length > 0) {
+        <div class="alert alert-danger py-2">
+            <ul class="mb-0 ps-3 small">
+                @for (e of errores; track $index) { <li>{{ e }}</li> }
+            </ul>
+        </div>
+        }
+
+        <div class="admin-card mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-3 mb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="logoliga.jpg" alt="Logo LFMDM" class="cedula-logo">
+                    <div>
+                        <h2 class="subtitulo mb-0">Cédula Arbitral LFMDM</h2>
+                        <small class="text-muted">Acta de partido</small>
+                    </div>
+                </div>
+                <div class="fw-bold fs-5">
+                    ({{ golesEquipo(partidoActual, 'local') }}) MARCADOR FINAL ({{ golesEquipo(partidoActual,
+                    'visitante') }})
+                </div>
+            </div>
+
+            <!-- Datos Generales -->
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold">Categoría</label>
+                    <input type="text" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.categoria">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small fw-semibold">Jornada</label>
+                    <input type="number" min="1" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.jornada">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold">Fase</label>
+                    <select class="form-select form-select-sm custom-input" [(ngModel)]="partidoActual.fase">
+                        <option value="Round Robin">Round Robin</option>
+                        <option value="Semifinal">Semifinal</option>
+                        <option value="Final">Final</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold">Estado</label>
+                    <select class="form-select form-select-sm custom-input" [(ngModel)]="partidoActual.estado">
+                        <option value="Programado">Programado</option>
+                        <option value="Finalizado">Finalizado</option>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold">Fecha</label>
+                    <input type="date" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.fecha">
+                    @if (partidoActual.fecha && !esDomingo(partidoActual.fecha)) {
+                    <small class="text-warning-emphasis">Aviso: no es domingo.</small>
+                    }
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small fw-semibold">Hora</label>
+                    <input type="time" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.hora">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold">Árbitro *</label>
+                    <input type="text" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.arbitro">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold">A. Asistente</label>
+                    <input type="text" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.asistente">
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold">Equipo Local</label>
+                    <select class="form-select form-select-sm custom-input" [(ngModel)]="partidoActual.localSlug"
+                        (ngModelChange)="alCambiarEquipo('local')">
+                        @for (eq of equipos; track eq.slug) { <option [value]="eq.slug">{{ eq.nombre }}</option> }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold">Equipo Visitante</label>
+                    <select class="form-select form-select-sm custom-input" [(ngModel)]="partidoActual.visitanteSlug"
+                        (ngModelChange)="alCambiarEquipo('visitante')">
+                        @for (eq of equipos; track eq.slug) { <option [value]="eq.slug">{{ eq.nombre }}</option> }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Alineaciones (1-7 por equipo, reproduciendo la cédula física) -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-lg-6">
+                    <h3 class="h6 fw-bold mb-2">{{ nombreEquipo(partidoActual.localSlug) }} (Titulares 1-7)</h3>
+                    <table class="table table-bordered table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Dorsal</th>
+                                <th>TA</th>
+                                <th>TR</th>
+                                <th>G</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of partidoActual.alineacionLocal; track row.slot) {
+                            <tr>
+                                <td class="text-center">{{ row.slot }}</td>
+                                <td>
+                                    @if (rosterDe('local').length > 0) {
+                                    <select class="form-select form-select-sm" [(ngModel)]="row.nombre"
+                                        (ngModelChange)="alSeleccionarTitular('local', row)">
+                                        <option value="">Seleccionar...</option>
+                                        @for (j of rosterDe('local'); track j.numero) {
+                                        <option [value]="j.nombre">#{{ j.playera }} {{ j.nombre }}</option>
+                                        }
+                                    </select>
+                                    } @else {
+                                    <input type="text" class="form-control form-control-sm" placeholder="Nombre"
+                                        [(ngModel)]="row.nombre">
+                                    }
+                                </td>
+                                <td style="width: 65px;"><input type="number" class="form-control form-control-sm"
+                                        [(ngModel)]="row.playera"></td>
+                                <td class="text-center">{{ contarJugadora(partidoActual, 'local', row.nombre, 'TA') ||
+                                    '' }}</td>
+                                <td class="text-center">{{ contarJugadora(partidoActual, 'local', row.nombre, 'TR') ||
+                                    '' }}</td>
+                                <td class="text-center fw-bold">{{ contarJugadora(partidoActual, 'local', row.nombre,
+                                    'G') || '' }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <h3 class="h6 fw-bold mb-2">{{ nombreEquipo(partidoActual.visitanteSlug) }} (Titulares 1-7)</h3>
+                    <table class="table table-bordered table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Dorsal</th>
+                                <th>TA</th>
+                                <th>TR</th>
+                                <th>G</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of partidoActual.alineacionVisitante; track row.slot) {
+                            <tr>
+                                <td class="text-center">{{ row.slot }}</td>
+                                <td>
+                                    @if (rosterDe('visitante').length > 0) {
+                                    <select class="form-select form-select-sm" [(ngModel)]="row.nombre"
+                                        (ngModelChange)="alSeleccionarTitular('visitante', row)">
+                                        <option value="">Seleccionar...</option>
+                                        @for (j of rosterDe('visitante'); track j.numero) {
+                                        <option [value]="j.nombre">#{{ j.playera }} {{ j.nombre }}</option>
+                                        }
+                                    </select>
+                                    } @else {
+                                    <input type="text" class="form-control form-control-sm" placeholder="Nombre"
+                                        [(ngModel)]="row.nombre">
+                                    }
+                                </td>
+                                <td style="width: 65px;"><input type="number" class="form-control form-control-sm"
+                                        [(ngModel)]="row.playera"></td>
+                                <td class="text-center">{{ contarJugadora(partidoActual, 'visitante', row.nombre, 'TA')
+                                    || '' }}</td>
+                                <td class="text-center">{{ contarJugadora(partidoActual, 'visitante', row.nombre, 'TR')
+                                    || '' }}</td>
+                                <td class="text-center fw-bold">{{ contarJugadora(partidoActual, 'visitante',
+                                    row.nombre, 'G') || '' }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Goles -->
+            <div class="border-top pt-3 mb-3">
+                <h3 class="h6 fw-bold">Goles</h3>
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-6 col-md-3">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevoGol.equipo"
+                            (ngModelChange)="nuevoGol.jugadora = ''">
+                            <option value="local">{{ nombreEquipo(partidoActual.localSlug) }}</option>
+                            <option value="visitante">{{ nombreEquipo(partidoActual.visitanteSlug) }}</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-5">
+                        @if (rosterDe(nuevoGol.equipo).length > 0) {
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevoGol.jugadora">
+                            <option value="">Jugadora...</option>
+                            @for (j of rosterDe(nuevoGol.equipo); track j.numero) {
+                            <option [value]="j.nombre">#{{ j.playera }} {{ j.nombre }}</option>
+                            }
+                        </select>
+                        } @else {
+                        <input type="text" class="form-control form-control-sm custom-input"
+                            placeholder="Jugadora que anotó" [(ngModel)]="nuevoGol.jugadora">
+                        }
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <input type="number" min="1" max="45" class="form-control form-control-sm custom-input"
+                            placeholder="Min" [(ngModel)]="nuevoGol.minuto">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <button type="button" class="btn btn-agregar btn-sm w-100" (click)="agregarGol()">+ Gol</button>
+                    </div>
+                </div>
+                @for (g of partidoActual.goles; track $index) {
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ g.equipo === 'local' ? nombreEquipo(partidoActual.localSlug) :
+                        nombreEquipo(partidoActual.visitanteSlug) }} — {{ g.jugadora }} ({{ g.minuto }}')</span>
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0"
+                        (click)="partidoActual.goles.splice($index, 1)">Quitar</button>
+                </div>
+                }
+            </div>
+
+            <!-- Penales si empatan -->
+            @if (golesEquipo(partidoActual, 'local') === golesEquipo(partidoActual, 'visitante')) {
+            <div class="p-3 rounded bg-light border mb-3">
+                <div class="fw-bold small mb-2">Definición por Penales (obligatorio si finaliza empatado)</div>
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small">Penales {{ nombreEquipo(partidoActual.localSlug) }}</label>
+                        <input type="number" min="0" class="form-control form-control-sm custom-input"
+                            [(ngModel)]="partidoActual.penalesLocal">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small">Penales {{ nombreEquipo(partidoActual.visitanteSlug) }}</label>
+                        <input type="number" min="0" class="form-control form-control-sm custom-input"
+                            [(ngModel)]="partidoActual.penalesVisitante">
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- Cambios -->
+            <div class="border-top pt-3 mb-3">
+                <h3 class="h6 fw-bold">Cambios / Sustituciones</h3>
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-12 col-md-2">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevoCambio.equipo"
+                            (ngModelChange)="nuevoCambio.sale = ''; nuevoCambio.entra = ''">
+                            <option value="local">{{ nombreEquipo(partidoActual.localSlug) }}</option>
+                            <option value="visitante">{{ nombreEquipo(partidoActual.visitanteSlug) }}</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <input type="text" class="form-control form-control-sm custom-input" placeholder="Sale"
+                            [(ngModel)]="nuevoCambio.sale" list="listaCambioEquipo">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <input type="text" class="form-control form-control-sm custom-input" placeholder="Entra"
+                            [(ngModel)]="nuevoCambio.entra" list="listaCambioEquipo">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <input type="number" min="1" max="45" class="form-control form-control-sm custom-input"
+                            placeholder="Min" [(ngModel)]="nuevoCambio.minuto">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <button type="button" class="btn btn-agregar btn-sm w-100" (click)="agregarCambio()">+
+                            Cambio</button>
+                    </div>
+                </div>
+                <datalist id="listaCambioEquipo">
+                    @for (j of rosterDe(nuevoCambio.equipo); track j.numero) {
+                    <option [value]="j.nombre"></option>
+                    }
+                </datalist>
+                @for (c of partidoActual.cambios; track $index) {
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ c.equipo === 'local' ? nombreEquipo(partidoActual.localSlug) :
+                        nombreEquipo(partidoActual.visitanteSlug) }}: sale {{ c.sale }}, entra {{ c.entra }} ({{
+                        c.minuto }}')</span>
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0"
+                        (click)="partidoActual.cambios.splice($index, 1)">Quitar</button>
+                </div>
+                }
+            </div>
+
+            <!-- Tarjetas -->
+            <div class="border-top pt-3 mb-3">
+                <h3 class="h6 fw-bold">Tarjetas (T.A / T.R)</h3>
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-6 col-md-2">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevaTarjeta.equipo"
+                            (ngModelChange)="nuevaTarjeta.jugadora = ''">
+                            <option value="local">{{ nombreEquipo(partidoActual.localSlug) }}</option>
+                            <option value="visitante">{{ nombreEquipo(partidoActual.visitanteSlug) }}</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <input type="text" class="form-control form-control-sm custom-input" placeholder="Jugadora"
+                            [(ngModel)]="nuevaTarjeta.jugadora" list="listaTarjetaEquipo">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevaTarjeta.tipo">
+                            <option value="Amarilla">Amarilla</option>
+                            <option value="Roja">Roja</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <input type="number" min="1" max="45" class="form-control form-control-sm custom-input"
+                            placeholder="Min" [(ngModel)]="nuevaTarjeta.minuto">
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <button type="button" class="btn btn-agregar btn-sm w-100" (click)="agregarTarjeta()">+
+                            Tarjeta</button>
+                    </div>
+                </div>
+                <datalist id="listaTarjetaEquipo">
+                    @for (j of rosterDe(nuevaTarjeta.equipo); track j.numero) {
+                    <option [value]="j.nombre"></option>
+                    }
+                </datalist>
+                @for (t of partidoActual.tarjetas; track $index) {
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ t.tipo }} — {{ t.jugadora }} ({{ t.minuto }}')</span>
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0"
+                        (click)="partidoActual.tarjetas.splice($index, 1)">Quitar</button>
+                </div>
+                }
+            </div>
+
+            <!-- Faltas e Incidencias -->
+            <div class="border-top pt-3 mb-4">
+                <h3 class="h6 fw-bold">Faltas e Incidencias</h3>
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-6 col-md-2">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevaIncidencia.equipo">
+                            <option value="local">{{ nombreEquipo(partidoActual.localSlug) }}</option>
+                            <option value="visitante">{{ nombreEquipo(partidoActual.visitanteSlug) }}</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <select class="form-select form-select-sm custom-input" [(ngModel)]="nuevaIncidencia.tipo">
+                            <option value="Falta">Falta</option>
+                            <option value="Incidencia">Incidencia</option>
+                        </select>
+                    </div>
+                    <div class="col-8 col-md-4">
+                        <input type="text" class="form-control form-control-sm custom-input" placeholder="Descripción"
+                            [(ngModel)]="nuevaIncidencia.descripcion">
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <input type="number" min="1" max="45" class="form-control form-control-sm custom-input"
+                            placeholder="Min" [(ngModel)]="nuevaIncidencia.minuto">
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <button type="button" class="btn btn-agregar btn-sm w-100" (click)="agregarIncidencia()">+
+                            Agregar</button>
+                    </div>
+                </div>
+                @for (inc of partidoActual.incidencias; track $index) {
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ inc.tipo }} ({{ inc.minuto }}'): {{ inc.descripcion }}</span>
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0"
+                        (click)="partidoActual.incidencias.splice($index, 1)">Quitar</button>
+                </div>
+                }
+            </div>
+
+            <!-- Firmas -->
+            <div class="row g-3 border-top pt-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold">Firma del Capitán (Local)</label>
+                    <input type="text" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.firmaLocal">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold">Firma del Capitán (Visitante)</label>
+                    <input type="text" class="form-control form-control-sm custom-input"
+                        [(ngModel)]="partidoActual.firmaVisitante">
+                </div>
+                <div class="col-12 text-end mt-3">
+                    <button type="button" class="btn btn-principal" (click)="guardarCedula()">Guardar Cédula</button>
+                </div>
+            </div>
+        </div>
+        }
+        }
+    </div>
+</div>
