@@ -59,7 +59,7 @@
                         </form>
                     </div>
 
-                    <div class="table-responsive" *ngIf="jugadoras.length > 0; else sinJugadoras">
+                    <div class="table-responsive" *ngIf="jugadoras && jugadoras.length > 0; else sinJugadoras">
                         <table class="table table-sm table-hover align-middle mb-0 bg-white rounded">
                             <thead>
                                 <tr>
@@ -83,7 +83,7 @@
                     </div>
 
                     <ng-template #sinJugadoras>
-                        <p class="text-muted small mb-0">Cargando lista de jugadoras...</p>
+                        <p class="text-muted small mb-0">No hay jugadoras registradas en este equipo.</p>
                     </ng-template>
                 </div>
             </div>

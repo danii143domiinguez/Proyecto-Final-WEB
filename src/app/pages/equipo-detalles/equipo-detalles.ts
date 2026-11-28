@@ -57,15 +57,21 @@ export class EquipoDetalles implements OnInit {
   }
 
   cargarJugadoras() {
-    this.servicio.getJugadoras(this.slug).subscribe(data => {
-      this.jugadoras = data;
-      this.cdr.detectChanges();
+    this.servicio.getJugadoras(this.slug).subscribe({
+      next: (data) => {
+        this.jugadoras = Array.isArray(data) ? data : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.jugadoras = [];
+        this.cdr.detectChanges();
+      }
     });
   }
 
   siguienteId() {
     if (!this.equipo) return '';
-    const num = this.jugadoras.length + 1;
+    const num = (this.jugadoras?.length || 0) + 1;
     return this.equipo.prefijo + (num < 10 ? '0' + num : num);
   }
 
@@ -74,7 +80,7 @@ export class EquipoDetalles implements OnInit {
       nombreCompleto: '',
       edad: 20,
       posicion: 'Medio',
-      playera: this.jugadoras.length + 1
+      playera: (this.jugadoras?.length || 0) + 1
     };
     this.mostrarForm = true;
   }
@@ -82,10 +88,14 @@ export class EquipoDetalles implements OnInit {
   guardar() {
     if (!this.nueva.nombreCompleto) return;
 
-    this.servicio.agregarJugadora(this.slug, this.nueva).subscribe(creada => {
-      this.jugadoras.push(creada);
-      this.mostrarForm = false;
-      this.cdr.detectChanges();
+    this.servicio.agregarJugadora(this.slug, this.nueva).subscribe({
+      next: (creada) => {
+        if (creada && !creada.error) {
+          this.jugadoras.push(creada);
+          this.mostrarForm = false;
+          this.cdr.detectChanges();
+        }
+      }
     });
   }
 }

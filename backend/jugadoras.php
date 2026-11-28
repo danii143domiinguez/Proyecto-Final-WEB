@@ -13,7 +13,7 @@ try {
     $input = file_get_contents("php://input");
     $data = json_decode($input, true);
 
-    $conn = new mysqli("localhost", "root", "12345", "mujeres_diversas_mexico");
+    $conn = new mysqli("localhost", "root", "root123", "mujeres diversas mexico");
     //AQUI TIENEN QUE PONER LA INFORMACIÓN DE SU LOCALHOST PARA QUE CONECTEN A LA BASE DE
 
     if ($conn->connect_error) {
